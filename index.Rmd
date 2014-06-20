@@ -1,0 +1,88 @@
+---
+title       : Coursera "Developing Data Products" Assignment
+subtitle    : Shiny App Description
+author      : Ioanna Aristeidopoulou
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : [bootstrap]            # {mathjax, quiz, bootstrap}
+mode        : standalone # {standalone, draft}
+---
+
+## Description of my Shiny Application
+
+The purpose of this application is to allow the user explore the US State data.
+
+- The user selects the data dimension he/she wants to display.
+  This can be one of the following:
+  - Population, 
+  - Income, 
+  - Illiteracy, 
+  - Life.Exp, 
+  - Murder, 
+  - HS.Grad, 
+  - Frost, 
+  - Area.      
+- An intensity map is displayed for the selected dimension  
+- The color intensity of each state corresponds to the value of the selected dimension
+
+--- .class #id 
+
+## ui.R Code
+
+This is the user interface part of my shiny app:
+
+```{r eval=FALSE}
+library(shiny)
+require(datasets)
+states <- data.frame(state.name, state.x77)
+shinyUI(fluidPage(
+        # Application title
+        titlePanel("US State Data"),
+        # Sidebar with controls to select the data index to display in Geo Chart
+        sidebarLayout(sidebarPanel(
+                selectInput("dataIndex", "Select Data Index:", choices=colnames(states[,-1])),hr()),
+                # Show the google map
+                mainPanel(h3(textOutput("dataIndex")),htmlOutput("view")))))
+```
+
+--- .class #id 
+## server.R Code
+
+This is the server part of my shiny app:
+
+```{r eval=FALSE}
+library(shiny)
+library(googleVis)
+require(datasets)
+states <- data.frame(state.name, state.x77)
+shinyServer(function(input, output) {
+        output$dataIndex <- reactive({
+         switch(input$dataIndex,"Population" = "Population",
+                "Income" = "Income", "Illiteracy" = "Illiteracy",
+                "Life.Exp" = "Life.Exp", "Murder" = "Murder",
+                "HS.Grad" = "HS.Grad","Frost" = "Frost","Area" = "Area")})
+ output$view <- renderGvis({
+ gvisGeoChart(states, locationvar = "state.name", colorvar = input$dataIndex,options=list(region="US", 
+displayMode="regions", resolution="provinces",width=600, height=400))})
+})
+```
+
+--- .class #id 
+## US State Intensity Map
+
+<div align="center">
+<iframe 
+src="http://iaristeid.shinyapps.io/DataProducts/" >
+  </iframe></div>
+
+
+```{r, echo=FALSE, chart1, fig.show='asis', results='asis', fig.align='center'}
+suppressPackageStartupMessages(library(googleVis))
+require(datasets)
+states <- data.frame(state.name, state.x77)
+geo1 <- gvisGeoChart(states, locationvar = "state.name", colorvar = "Population",options=list(region="US", displayMode="regions", resolution="provinces",width = 200, height = 100))
+print(geo1, "chart")
+```
+
